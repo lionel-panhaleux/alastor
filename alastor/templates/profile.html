@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
+{% block meta %}
+<meta property="country" content="{{ country }}" />
+<meta property="city" content="{{ city }}" />
+{% endblock %}
+{% block content %}
+<article>
+    <div>
+        <div><img class="avatar" src="{{url_for('base.avatar')}}"
+                onclick="document.getElementById('upload-avatar').click();">
+            <form id="avatar-form" method="post" enctype="multipart/form-data" action="{{url_for('base.avatar')}}">
+                <input id="upload-avatar" type="file" accept="image/*" name="avatar" onchange="form.submit()"
+                    style="display: none;">
+            </form>
+        </div>
+        <div>
+            <form id="profile" method="post">
+                <input type="text" value="{{ email }}" email="email">
+                <input type="text" name="password" placeholder="Password">
+                <input type="text" value="{{ name }}" name="name" placeholder="Name">
+                <input type="text" value="{{ vekn }}" name="vekn" placeholder="VEKN ID">
+                <select name="country" id="select-country">
+                    <option value="">Select Country</option>
+                </select>
+                <select name="city" id="select-city">
+                    <option value="">Select City</option>
+                </select>
+                <select name="timezone" id="select-timezone">
+                    <option value="">Select Timezone</option>
+                </select>
+                <input type="submit" value="Save">
+            </form>
+        </div>
+        {% if vekn_name or vekn_country %}
+        <div class=warning>
+            <p>Some information differ in the VEKN registry:</p>
+            <ul>
+                {% if vekn_name %}
+                <li>Name: {{ vekn_name }}</li>
+                {% endif %}
+                {% if vekn_country %}
+                <li>Country: {{ vekn_country }}</li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</article>
+{% endblock %}

@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: alastor
+Version: 0.0.dev0
+Summary: "Website for V:tES tournament organisation",
+Home-page: http://github.com/lionel-panhaleux/alastor
+Author: lionelpx
+Author-email: lionel.panhaleux@gmail.com
+License: "MIT"
+Description: # alastor
+Keywords: vampire vtes ccg tournament web prince inner circle
+Platform: UNKNOWN
+Classifier: Development Status :: 0 - Alpha
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Environment :: Web Environment
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Framework :: Flask
+Classifier: Topic :: Games/Entertainment
+Classifier: Topic :: Internet :: WWW/HTTP :: WSGI :: Server
+Description-Content-Type: text/markdown
+Provides-Extra: dev

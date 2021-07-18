@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<article>
+    <form action="put">
+        <input type="submit" value="＋ New">
+    </form>
+    {% for game in games %}
+    {% if game.published %}
+    <div class="game">
+        {% else %}
+        <div class="game draft">
+            {% endif %}
+            <img href="{{ game.banner }}">
+            <h3>{{ game.name }}</h3>
+            <sub>{{ game.type }}</sub>
+            <sub>{{ game.structure }}</sub>
+            {% if game.date_to %}
+            <sub>{{ game.date }} – {{ game.date_to }}</sub>
+            {% else %}
+            <sub>{{ game.date }}</sub>
+            {% endif %}
+        </div>
+        {% endfor %}
+</article>
+{% endblock %}

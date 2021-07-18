@@ -1,0 +1,13 @@
+babel
+flask
+flask-babel
+pillow
+psycopg2
+setuptools
+
+[dev]
+black
+flake8
+ipython
+pytest
+zest.releaser[recommended]

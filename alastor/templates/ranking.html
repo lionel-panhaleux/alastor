@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<article>
+    <h2>Top 100</h2>
+    <table>
+        <thead>
+            <tr>
+                <td>VEKN</td>
+                <td>Name</td>
+                <td>Country</td>
+                <td>Points</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in ranking %}
+            <tr>
+                <td>{{ player.vekn }}</td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.country }}</td>
+                <td>{{ player.constructed }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+{% endblock %}

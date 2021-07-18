@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="{{ og_title|default('Alastor') }}" />
+    <meta property="og:description"
+        content="{{ og_description|default('Vampire: the Eternal Struggle (VTES) tournaments platform') }}" />
+    <meta name="description" content="Vampire: the Eternal Struggle (VTES) tournaments platform">
+    <meta name="keywords" content="Vampire, the Eternal Struggle, World of Darkness, WoD, VtES, CCG, Tournament">
+    {% block meta %}{% endblock %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/vtes.svg') }}">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-157267369-1"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-157267369-1');
+    </script>
+    {% block scripts %}{% endblock %}
+    <title>Alastor</title>
+</head>
+
+<body>
+    <header role="banner">
+        {% block header %}
+        <img src="{{ url_for('static', filename='img/vtes.svg') }}">
+        <h1>Alastor</h1>
+        <nav role="navigation" id="navigation">
+            <a href="/">Current</a>
+            <a href="/ranking.html">Rankings</a>
+            {% if session.user %}
+            <a href="/organise.html">Organise</a>
+            <a href="/profile.html">Profile</a>
+            {% if session.rank | default(0) > 0 %}
+            <a href="/player.html">Manage Player</a>
+            {% endif %}
+            <button onclick="logout()">
+                Log out
+            </button>
+            <form id="logout-form" style="display: none;" />
+            {% else %}
+            <button onclick="display_login_modal()">
+                Log in
+            </button>
+            {% endif %}
+        </nav>
+        {% endblock %}
+    </header>
+    <div id="login-modal" class="modal">
+        <div class="modal-content" , id="login-modal-content">
+            <form id="login-form" method="post">
+                <input type="email" name="email" placeholder="email">
+                <input type="password" name="password" placeholder="password">
+                <input type="submit" id="login-submit" value="Log in">
+                <input type="submit" id="signup-submit" value="Sign up">
+            </form>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+    <footer>
+        {% block footer %}{% endblock %}
+    </footer>
+</body>
+
+</html>
