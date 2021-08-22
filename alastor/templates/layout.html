@@ -35,7 +35,9 @@
             <a href="/">Current</a>
             <a href="/ranking.html">Rankings</a>
             {% if session.user %}
+            {% if session.rank | default(0) > 0 %}
             <a href="/organise.html">Organise</a>
+            {% endif %}
             <a href="/profile.html">Profile</a>
             {% if session.rank | default(0) > 0 %}
             <a href="/player.html">Manage Player</a>

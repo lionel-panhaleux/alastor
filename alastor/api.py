@@ -1,9 +1,8 @@
+import itertools
 import babel
-import collections
 import contextlib
 import datetime
 import flask
-import html.parser
 import json
 import logging
 import os
@@ -29,7 +28,7 @@ KRCG_STATIC_SERVER = "https://static.krcg.org"
 ANONYMOUS_AVATAR = "anonymous.png"
 VEKN_LOGIN = os.getenv("VEKN_LOGIN")
 VEKN_PASSWORD = os.getenv("VEKN_PASSWORD")
-
+CACHE = {"ranking": [], "ranking_timestamp": datetime.datetime(1, 1, 1), "admins": []}
 # babel = flask_babel.Babel()
 
 
@@ -39,12 +38,14 @@ class _Geography:
         self.cities = {}
         self._countries_rev = {}
 
+    def get_country_name(self, code):
+        return self.countries.get(code)
+
     def get_country_code(self, name):
         return self._countries_rev.get(name)
 
-    def get_country_flag(self, name):
+    def get_country_flag(self, code):
         base = 127397
-        code = self.get_country_code(name)
         if not code:
             return
         return "".join(chr(base + ord(c)) for c in code)
@@ -173,10 +174,23 @@ def tournament():
     return flask.render_template("organise.html")
 
 
+def _get_vekn_token():
+    result = requests.post(
+        "https://www.vekn.net/api/vekn/login",
+        data={"username": VEKN_LOGIN, "password": VEKN_PASSWORD},
+    )
+    result.raise_for_status()
+    result = result.json()
+    return result["data"]["auth"]
+
+
 @base.route("/profile.html", methods=["GET", "POST"])
 @decorators.logged
 def profile():
     with flask.current_app.cursor() as cur:
+        if not CACHE["admins"]:
+            cur.execute("select id from users where obj -> level = 3")
+            CACHE["admins"] = cur.fetchall()
         cur.execute(
             "select email, obj from users where id=%s",
             [flask.session["user"]],
@@ -184,22 +198,17 @@ def profile():
         user = cur.fetchone()
         email = user.email
         if flask.request.method == "POST":
-            email = flask.request.form.pop("email", None) or email
-            password = flask.request.form.pop("password", None)
+            data = dict(flask.request.form)
+            email = data.pop("email", None) or email
+            password = data.pop("password", None)
             if password:
                 password = werkzeug.generate_password_hash(password)
-            user.obj.update(flask.request.form)
+            user.obj.update(data)
         if user.obj.get("vekn"):
             try:
                 user.obj.pop("vekn_name", None)
                 user.obj.pop("vekn_country", None)
-                result = requests.post(
-                    "https://www.vekn.net/api/vekn/login",
-                    data={"username": VEKN_LOGIN, "password": VEKN_PASSWORD},
-                )
-                result.raise_for_status()
-                result = result.json()
-                token = result["data"]["auth"]
+                token = _get_vekn_token()
                 result = requests.get(
                     f"https://www.vekn.net/api/vekn/registry?filter={user.obj['vekn']}",
                     headers={"Authorization": f"Bearer {token}"},
@@ -245,57 +254,37 @@ def player():
 
 @base.route("/ranking.html")
 def ranking():
-    r = requests.get("https://www.vekn.net/player-registry")
+    if CACHE["ranking_expiration"] > datetime.datetime.now():
+        return flask.render_template("ranking.html", CACHE["ranking"])
+    try:
+        token = _get_vekn_token()
+        result = requests.get(
+            "https://www.vekn.net/api/vekn/ranking",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        result.raise_for_status()
+        ranking = result.json()["data"]["players"][:1000]
+    except:  # noqa: E722
+        logger.exception("Ranking unavailable")
+        ranking = []
 
-    FIELDS = [
-        "vekn",
-        "name",
-        "country",
-        "state",
-        "city",
-        "constructed",
-        "limited",
-        "notes",
-    ]
-
-    class RankingParser(html.parser.HTMLParser):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.ranking = []
-            self.fields = iter([])
-            self.field = None
-
-        def handle_starttag(self, tag, attrs):
-            if tag == "tr":
-                if self.ranking:
-                    for key in self.ranking[-1].keys():
-                        self.ranking[-1][key] = self.ranking[-1][key].strip()
-                self.ranking.append(collections.defaultdict(str))
-                self.fields = iter(FIELDS)
-            if tag == "td":
-                try:
-                    self.field = next(self.fields)
-                except StopIteration:
-                    self.field = None
-
-        def handle_data(self, data):
-            if not self.field:
-                return
-            self.ranking[-1][self.field] += data
-
-        def handle_endtag(self, tag):
-            if tag == "tr":
-                self.fields = iter([])
-
-    parser = RankingParser()
-    parser.feed(r.content.decode("utf-8"))
-    ranking = parser.ranking[7:-1]
-    del parser
     for player in ranking:
-        flag = GEOGRAPHY.get_country_flag(player.get("country"))
+        player["vekn"] = player.pop("veknid")
+        player["name"] = " ".join([player.pop("firstname"), player.pop("lastname")])
+        player["constructed"] = int(player.pop("rtp_constructed"))
+        player.pop("rtp_limited")
+        code = player.get("country")
+        name = GEOGRAPHY.get_country_name(code)
+        if not name:
+            continue
+        player["country"] = name
+        flag = GEOGRAPHY.get_country_flag(code)
         if not flag:
             continue
-        player["country"] = " ".join([flag, player["country"]])
+        player["country"] = " ".join([flag, name])
+    ranking = list(itertools.takewhile(lambda p: p["constructed"] > 9, ranking))
+    CACHE["ranking_expiration"] = datetime.datetime.now() + datetime.timedelta(hours=1)
+    CACHE["ranking"] = ranking
     return flask.render_template("ranking.html", ranking=ranking)
 
 

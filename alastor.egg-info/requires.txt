@@ -3,6 +3,7 @@ flask
 flask-babel
 pillow
 psycopg2
+requests
 setuptools
 
 [dev]
