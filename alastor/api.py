@@ -58,23 +58,24 @@ class _Geography:
 
     def load(self):
         logger.info("loading geographical data...")
-        # local_filename, _headers = urllib.request.urlretrieve(
-        #     KRCG_STATIC_SERVER + "/data/countries.json"
-        # )
         data = json.loads(
             pkg_resources.resource_string("alastor.geodata", "countries.json")
         )
         self.countries = {c["iso"]: c["country"] for c in data}
         self.cities = {k: [] for k in self.countries.keys()}
-        # local_filename, _headers = urllib.request.urlretrieve(
-        #     KRCG_STATIC_SERVER + "/data/cities.json"
-        # )
         data = json.loads(
             pkg_resources.resource_string("alastor.geodata", "cities.json")
         )
         for city in sorted(data, key=lambda c: c["name"]):
             # ignore cities sub-divisions and destroyed/abandonned places
-            if city["feature_code"] in {"PPLA5", "PPLX", "PPLL", "PPLQ", "PPLW"}:
+            if city["feature_code"] in {
+                "PPLA5",
+                "PPLH",
+                "PPLL",
+                "PPLQ",
+                "PPLW",
+                "PPLX",
+            }:
                 continue
             if city["country_code"] == "US":
                 name = f'{city["name"]}, {city["admin1_code"]}'
