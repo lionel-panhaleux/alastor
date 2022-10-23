@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import os.path
+import pathlib
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageOps
@@ -28,7 +29,12 @@ KRCG_STATIC_SERVER = "https://static.krcg.org"
 ANONYMOUS_AVATAR = "anonymous.png"
 VEKN_LOGIN = os.getenv("VEKN_LOGIN")
 VEKN_PASSWORD = os.getenv("VEKN_PASSWORD")
-CACHE = {"ranking": [], "ranking_timestamp": datetime.datetime(1, 1, 1), "admins": []}
+CACHE = {
+    "ranking": [],
+    "ranking_timestamp": datetime.datetime(1, 1, 1),
+    "admins": [],
+    "ranking_expiration": datetime.datetime(1, 1, 1),
+}
 # babel = flask_babel.Babel()
 
 
@@ -52,31 +58,35 @@ class _Geography:
 
     def load(self):
         logger.info("loading geographical data...")
-        local_filename, _headers = urllib.request.urlretrieve(
-            KRCG_STATIC_SERVER + "/data/countries.json"
+        # local_filename, _headers = urllib.request.urlretrieve(
+        #     KRCG_STATIC_SERVER + "/data/countries.json"
+        # )
+        data = json.loads(
+            pkg_resources.resource_string("alastor.geodata", "countries.json")
         )
-        with open(local_filename) as fp:
-            self.countries = {c["iso"]: c["country"] for c in json.load(fp)}
-            self.cities = {k: [] for k in self.countries.keys()}
-        local_filename, _headers = urllib.request.urlretrieve(
-            KRCG_STATIC_SERVER + "/data/cities.json"
+        self.countries = {c["iso"]: c["country"] for c in data}
+        self.cities = {k: [] for k in self.countries.keys()}
+        # local_filename, _headers = urllib.request.urlretrieve(
+        #     KRCG_STATIC_SERVER + "/data/cities.json"
+        # )
+        data = json.loads(
+            pkg_resources.resource_string("alastor.geodata", "cities.json")
         )
-        with open(local_filename) as fp:
-            for city in sorted(json.load(fp), key=lambda c: c["name"]):
-                # ignore cities sub-divisions and destroyed/abandonned places
-                if city["feature_code"] in {"PPLA5", "PPLX", "PPLL", "PPLQ", "PPLW"}:
-                    continue
-                if city["country_code"] == "US":
-                    name = f'{city["name"]}, {city["admin1_code"]}'
-                else:
-                    name = city["name"]
-                self.cities[city["country_code"]].append(
-                    {
-                        "name": name,
-                        "geoname_id": city["geoname_id"],
-                        "timezone": city["timezone"],
-                    }
-                )
+        for city in sorted(data, key=lambda c: c["name"]):
+            # ignore cities sub-divisions and destroyed/abandonned places
+            if city["feature_code"] in {"PPLA5", "PPLX", "PPLL", "PPLQ", "PPLW"}:
+                continue
+            if city["country_code"] == "US":
+                name = f'{city["name"]}, {city["admin1_code"]}'
+            else:
+                name = city["name"]
+            self.cities[city["country_code"]].append(
+                {
+                    "name": name,
+                    "geoname_id": city["geoname_id"],
+                    "timezone": city["timezone"],
+                }
+            )
         urllib.request.urlcleanup()
         self._countries_rev = {v: k for k, v in self.countries.items()}
 
@@ -255,7 +265,7 @@ def player():
 @base.route("/ranking.html")
 def ranking():
     if CACHE["ranking_expiration"] > datetime.datetime.now():
-        return flask.render_template("ranking.html", CACHE["ranking"])
+        return flask.render_template("ranking.html", ranking=CACHE["ranking"])
     try:
         token = _get_vekn_token()
         result = requests.get(

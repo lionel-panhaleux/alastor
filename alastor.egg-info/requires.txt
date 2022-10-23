@@ -1,6 +1,7 @@
 babel
 flask
 flask-babel
+krcg
 pillow
 psycopg2
 requests

@@ -7,7 +7,6 @@ Author: lionelpx
 Author-email: lionel.panhaleux@gmail.com
 License: "MIT"
 Keywords: vampire vtes ccg tournament web prince inner circle
-Platform: UNKNOWN
 Classifier: Development Status :: 0 - Alpha
 Classifier: Intended Audience :: End Users/Desktop
 Classifier: Natural Language :: English
@@ -24,44 +23,58 @@ License-File: LICENSE
 
 # alastor
 
+- [ ] Internationalisation
+
 ## officials
 
-[ ] NC designation
-[ ] Prince designation
-[ ] Assign VEKN ID#
+- [ ] Assign VEKN ID#
+- [ ] Resolve conflict on VEKN claims
 
 ## player profile
 
-[ ] Link VEKN ID#
-[ ] Upload profile picture
-[ ] Choose and change country & city
-[ ] Claim VEKN ID#
+- [x] Link VEKN ID#
+- [x] Upload profile picture
+- [x] Choose and change country & city
 
 ## tournament organization
 
-[ ] Create a Tournament
-[ ] Post Tournament info on VEKN, Facebook, Discord, Reddit
-[ ] Players registration
-[ ] Judge selection for multi-judge
-[ ] Decklist submission
-[ ] Archon seating
-[ ] Archon tournament report
-[ ] TWDA-formatted winning decklist
+- [ ] Create a Tournament
+    * 1-12 rounds structure
+    * League option
+    * Banner
+    * Multi-judge option
+    * Multi-decks option ? => no check when < 12 players
+- [ ] Display upcoming events
+- [ ] Display times in viewer timezone
+- [ ] Players registering themselves
+- [ ] Players registration using VEKN
+- [ ] Judge selection
+- [ ] Multi-judge control
+- [ ] Decklist submission, public/private option
+- [ ] Archon seating
+- [ ] Archon tournament report
+- [ ] TWDA-formatted winning decklist
 
-[ ] Register a Facebook Group, Discord channel or Reddit sub to get tournament announcements.
-[ ] Or even a BBCode Forum?
-[ ] Fetch player info from VEKN using the VEKN ID#
+## Ranking
+
+- [x] Display world ranking
 
 ## During the tournament
 
-[ ] Judges notes
-[ ] Penalties: Caution / Warning / Game Loss / Disqualification, integrate judge guide
-[ ] Tardiness / Drop-offs / Willful departure: auto re-arrange seatings
+- [ ] Player: Download deck list (Lackey)
+- [ ] Penalties: Caution / Warning / Game Loss / Disqualification
+- [ ] Tardiness / Drop-offs / Willful departure: auto re-arrange seatings
+- [ ] Head judge: check a deck list
 
 ## V2
 
-[ ] Auto PR on TWD repo
-[ ] Third party app(s) for fees collections
-[ ] Decks statistics (participants, finals)
-
-
+- [ ] NC designation
+- [ ] Prince designation
+- [ ] Post Tournament info on VEKN, Facebook, Discord, Reddit
+- [ ] Post tournament news/update (marketing campaign)
+- [ ] Auto PR on TWD repo
+- [ ] Third party app(s) for fees collections
+- [ ] Decks statistics (participants, finals)
+- [ ] Or even a BBCode Forum?
+- [ ] Archon validation
+- [ ] Integrate judge guide

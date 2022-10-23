@@ -6,5 +6,6 @@ setup.py
 alastor/__init__.py
 alastor/api.py
 alastor/decorators.py
+alastor/scripts.py
 alastor/db/__init__.py
 alastor/templates/__init__.py
